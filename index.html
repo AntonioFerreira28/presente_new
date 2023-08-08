@@ -1,0 +1,144 @@
+=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acesso à Fatura</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+  }
+  input[type="password"], input[type="text"], input[type="number"] {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  #log {
+    text-align: left;
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div>
+  <h1>Acesso à Fatura</h1>
+  <form id="accessForm">
+    <label for="password">Digite a senha:</label>
+    <input type="password" id="password" required>
+    <button type="button" id="submitButton">Acessar</button>
+  </form>
+</div>
+
+<div id="invoice" style="display: none;">
+  <h2>Fatura</h2>
+  <p id="bankMessage">Seu saldo no Banco do Tonho é: R$ <span id="currentValue">1000.00</span></p>
+  <label for="storeName">Nome da Loja/Produto:</label>
+  <input type="text" id="storeName" required>
+  <label for="subtractionAmount">Subtrair valor:</label>
+  <input type="number" id="subtractionAmount" min="0">
+  <button type="button" id="subtractButton">Subtrair</button>
+  <p id="loveMessage">Eu te amo muito meu amor!</p>
+</div>
+
+<div id="log">
+  <h3>Registro de Atividades</h3>
+  <ul id="activityLog"></ul>
+</div>
+
+<div>
+  <button type="button" id="clearCacheButton">Limpar Registro em Cache</button>
+</div>
+
+<script>
+  const correctPassword = "231020"; // Senha correta
+  let currentValue = JSON.parse(localStorage.getItem("currentValue")) || 1000; // Valor inicial da fatura
+  let activityData = JSON.parse(localStorage.getItem("activityData")) || [];
+
+  const passwordForm = document.getElementById("accessForm");
+  const invoiceSection = document.getElementById("invoice");
+  const passwordInput = document.getElementById("password");
+  const submitButton = document.getElementById("submitButton");
+  const currentValueSpan = document.getElementById("currentValue");
+  const storeNameInput = document.getElementById("storeName");
+  const subtractionAmountInput = document.getElementById("subtractionAmount");
+  const subtractButton = document.getElementById("subtractButton");
+  const activityLog = document.getElementById("activityLog");
+  const bankMessage = document.getElementById("bankMessage");
+  const loveMessage = document.getElementById("loveMessage");
+  const logSection = document.getElementById("log");
+  const clearCacheButton = document.getElementById("clearCacheButton");
+
+  submitButton.addEventListener("click", () => {
+    if (passwordInput.value === correctPassword) {
+      passwordForm.style.display = "none";
+      invoiceSection.style.display = "block";
+      logSection.style.display = "block";
+    } else {
+      alert("Senha incorreta. Tente novamente.");
+    }
+  });
+
+  subtractButton.addEventListener("click", () => {
+    const amount = parseFloat(subtractionAmountInput.value);
+    const storeName = storeNameInput.value.trim();
+    
+    if (!isNaN(amount) && amount > 0 && storeName !== "") {
+      currentValue -= amount;
+      currentValueSpan.textContent = currentValue.toFixed(2);
+      subtractionAmountInput.value = "";
+      
+      const logEntry = `${storeName} - Valor subtraído: R$ ${amount.toFixed(2)}`;
+      activityData.push(logEntry);
+      updateActivityLog();
+      saveActivityData();
+
+      storeNameInput.value = "";
+    } else {
+      alert("Por favor, preencha todos os campos corretamente.");
+    }
+  });
+
+  clearCacheButton.addEventListener("click", () => {
+    if (confirm("Tem certeza que deseja limpar o registro em cache? Isso irá apagar todos os dados armazenados.")) {
+      localStorage.removeItem("activityData");
+      localStorage.removeItem("currentValue");
+      currentValue = 1000;
+      currentValueSpan.textContent = "1000.00";
+      activityData = [];
+      activityLog.innerHTML = "";
+      alert("Registro em cache limpo com sucesso.");
+    }
+  });
+
+  function updateActivityLog() {
+    activityLog.innerHTML = "";
+    activityData.forEach(entry => {
+      const listItem = document.createElement("li");
+      listItem.textContent = entry;
+      activityLog.appendChild(listItem);
+    });
+  }
+
+  function saveActivityData() {
+    localStorage.setItem("activityData", JSON.stringify(activityData));
+    localStorage.setItem("currentValue", JSON.stringify(currentValue));
+    currentValueSpan.textContent = currentValue.toFixed(2);
+  }
+</script>
+
+</body>
+</html>
